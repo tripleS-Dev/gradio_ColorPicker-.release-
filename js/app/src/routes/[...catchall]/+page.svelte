@@ -190,6 +190,32 @@
 					});
 					newElement.textContent = head_element.textContent;
 
+					// Deduplicate external assets so re-mounts/reloads don't repeatedly
+					// append scripts and stylesheets from custom head HTML.
+					if (newElement.tagName === "SCRIPT") {
+						const srcAttr = newElement.getAttribute("src");
+						if (
+							srcAttr &&
+							document.head.querySelector(
+								`script[src="${CSS.escape(srcAttr)}"]`
+							)
+						) {
+							continue;
+						}
+					}
+
+					if (newElement.tagName === "LINK") {
+						const hrefAttr = newElement.getAttribute("href");
+						if (
+							hrefAttr &&
+							document.head.querySelector(
+								`link[href="${CSS.escape(hrefAttr)}"]`
+							)
+						) {
+							continue;
+						}
+					}
+
 					if (newElement.tagName == "META") {
 						const propertyAttr = newElement.getAttribute("property");
 						const nameAttr = newElement.getAttribute("name");
