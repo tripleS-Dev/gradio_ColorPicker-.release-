@@ -28,6 +28,11 @@ def increment_counter(counter):
     return counter + 1
 
 
+def show_hidden_radio(_choice):
+    """Repro for first Radio.change() update on an initially hidden output."""
+    return gr.Radio(visible=True)
+
+
 with gr.Blocks() as demo:
     gr.Markdown("# Visibility Test Demo")
     gr.Markdown(
@@ -79,6 +84,26 @@ with gr.Blocks() as demo:
         lambda x: f"Counter Result: {x}", inputs=counter, outputs=counter_result
     )
     increment_btn.click(increment_counter, inputs=counter, outputs=counter)
+
+    gr.Markdown("## First Radio.change() Hidden Output Regression Repro")
+    with gr.Row():
+        first_change_input_radio = gr.Radio(
+            choices=["1", "2"],
+            label="Trigger Radio",
+            value="1",
+            elem_id="first-change-input-radio",
+        )
+        first_change_output_radio = gr.Radio(
+            choices=["1", "2"],
+            label="Hidden Output Radio",
+            visible=False,
+            elem_id="first-change-output-radio",
+        )
+    first_change_input_radio.change(
+        fn=show_hidden_radio,
+        inputs=[first_change_input_radio],
+        outputs=[first_change_output_radio],
+    )
 
 
 if __name__ == "__main__":

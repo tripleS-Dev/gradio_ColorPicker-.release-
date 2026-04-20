@@ -437,7 +437,7 @@ export class AppTree {
 		new_state: Partial<SharedProps> & Record<string, unknown>,
 		check_visibility: boolean = true
 	) {
-		const node = find_node_by_id(this.root!, id);
+		let node = find_node_by_id(this.root!, id);
 		let already_updated_visibility = false;
 		if (check_visibility && !node?.component) {
 			await tick();
@@ -448,10 +448,13 @@ export class AppTree {
 				(n) => handle_visibility(n, this.#config.api_url)
 			]);
 			await tick();
+			// Refresh from the latest tree after visibility traversal/revival.
+			node = find_node_by_id(this.root!, id);
 			already_updated_visibility = true;
 		}
 		const _set_data = this.#set_callbacks.get(id);
 		if (!_set_data) {
+			if (!node) return;
 			const old_value = node?.props.props.value;
 			// @ts-ignore
 			const new_props = create_props_shared_props(new_state);
@@ -485,7 +488,7 @@ export class AppTree {
 		} else if (_set_data) {
 			_set_data(new_state);
 		}
-		if (!check_visibility || already_updated_visibility) return;
+		if (!check_visibility || already_updated_visibility || !node) return;
 		// need to let the UI settle before traversing again
 		// otherwise there could be
 		await tick();

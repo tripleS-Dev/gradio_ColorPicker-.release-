@@ -8,6 +8,20 @@ test.describe("Visibility States", () => {
 		await expect(textbox).toBeVisible();
 	});
 
+	test("first Radio.change() makes initially hidden Radio output visible", async ({
+		page
+	}) => {
+		const input_radio = page.locator("#first-change-input-radio");
+		const output_radio = page.locator("#first-change-output-radio");
+
+		await expect(output_radio).toHaveCount(0);
+
+		await input_radio.getByText("2").click();
+
+		await expect(output_radio).toHaveCount(1);
+		await expect(output_radio).toBeVisible();
+	});
+
 	test("components with visible=false are removed from DOM", async ({
 		page
 	}) => {
